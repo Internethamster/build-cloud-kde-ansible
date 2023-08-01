@@ -1,0 +1,81 @@
+---
+- name: Deploy a base instance for KDE Build
+  hosts: localhost
+  connection: local
+
+  gather_facts: yes
+
+  collections:
+    - community.general
+    - amazon.aws
+
+  vars:
+    partition: standard
+    fedora_release: 38
+    region: us-west-2
+    profile: default
+    aws_instance_role: kde-cloud-instance-tools-instance
+    subnet: subnet-fba35eb1
+    aws_vpc_id: vpc-94b6f1ec
+    ec2_architecture: x86_64
+    ec2_instance_type:
+      x86_64: m6a.2xlarge
+      arm64: m6g.8xlarge
+
+
+  tasks:
+    - name: identify the current IP address from which this is being run
+      community.general.ipify_facts:
+        timeout: 20
+    - name: Use this address in the security group configuration
+      ansible.builtin.template:
+        src: "groups_{{ partition }}.j2"
+        dest: "files/groups_{{ partition }}.yml"
+    - name: "Define the groups_{{ partition}}.yml CFN"
+      amazon.aws.cloudformation:
+        stack_name: "kde-cloud-instance-sg"
+        region: "{{ region }}"
+        profile: "{{ profile }}"
+        template: "./files/groups_{{ partition }}.yml"
+        create_changeset: true
+        tags:
+          maintained_by: "{{ ansible_user_id }}"
+          Stack: kde-cloud-instance
+
+    - name: Find the Fedora Cloud Base {{ fedora_release }} Image in the Fedora account
+      amazon.aws.ec2_ami_info:
+        region: "{{ region }}"
+        profile: "{{ profile }}"
+        owners: 125523088429
+        filters:
+          architecture: "{{ ec2_architecture }}"
+          name: "Fedora-Cloud-Base"
+      register: fedora_amis
+
+    - name: Get the most recently published image
+      set_fact:
+      fedora_ami: "{{ fedora_amis.images | sort(attribute='creation_date') | last  }}"
+
+    - name: Deploy an instance for building images
+      community.aws.ec2_instance:
+        name: "Builder-{{ ec2_architecture }}"
+        region: "{{ region }}"
+        profile: "{{ profile }}"
+        instance_role: "{{ aws_instance_role }}"
+        vpc_subnet_id: "{{ subnet }}"
+        instance_type: "{{ ec2_instance_type[ec2_architecture] }}"
+        security_group: "kde-cloud-instance-{{ partition }}-base-sg"
+        metadata_options:
+          http_tokens: required
+        volumes:
+          - device_name: /dev/sda1
+            ebs:
+              volume_size: 20
+              delete_on_termination: true
+        network:
+          assign_public_ip: true
+        image_id: "{{ fedora_ami.image_id }}"
+        user_data: "{{ lookup('file', 'files/builder-instance-userdata.yml') }}"
+        tags:
+          task: kde-cloud-instance
+          maintained_by: davdunc
