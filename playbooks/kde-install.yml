@@ -1,0 +1,55 @@
+---
+- name: Deploy a base instance for KDE Build
+  hosts:  
+  connection: local
+
+  gather_facts: yes
+
+  collections:
+    - community.general
+    - amazon.aws
+
+  vars:
+    partition: standard
+    fedora_release: 38
+    region: us-west-2
+    profile: default
+    aws_instance_role: kde-cloud-instance-tools-instance
+    subnet: subnet-fba35eb1
+    aws_vpc_id: vpc-94b6f1ec
+
+  tasks:
+    - name: Install KDE desktop
+      ansible.builtin.package:
+        name:
+          - kde-desktop-environment
+          - firefox 
+          - kde-apps
+          - kde-media
+          - libreoffice
+          # add libreoffice-draw and libreoffice-math (pagureio:fedora-kde/SIG#103)
+          - libreoffice-draw
+          - libreoffice-math
+          - fedora-release-kde
+          ### fixes
+          # minimal localization support - allows installing the kde-l10n-* packages
+          - kde-l10n
+          - fuse
+        state: present
+
+    - name: Install KDE desktop
+      ansible.builtin.package:
+        name:
+          - admin-tools
+          # drop tracker stuff pulled in by gtk3 (pagureio:fedora-kde/SIG#124)
+          - tracker-miners
+          - tracker
+          ### The KDE-Desktop
+          # Additional packages that are not default in kde-* groups, but useful
+          ### space issues
+          - ktorrent			# kget has also basic torrent features (~3 megs)
+          - digikam			# digikam has duplicate functionality with gwenview (~28 megs)
+          - kipi-plugins			# ~8 megs + drags in Marble
+          - krusader			# ~4 megs
+          - k3b				# ~15 megs
+        state: absent
