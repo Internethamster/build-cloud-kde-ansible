@@ -1,6 +1,6 @@
 ---
-- name: Deploy a base instance for KDE Build
-  hosts:  
+- name: Outfit the base kde instances in the account
+  hosts:  tag_task_kde-cloud-instance
   connection: local
 
   gather_facts: yes
@@ -45,8 +45,6 @@
           - tracker-miners
           - tracker
           ### The KDE-Desktop
-          # Additional packages that are not default in kde-* groups, but useful
-          ### space issues
           - ktorrent			# kget has also basic torrent features (~3 megs)
           - digikam			# digikam has duplicate functionality with gwenview (~28 megs)
           - kipi-plugins			# ~8 megs + drags in Marble
