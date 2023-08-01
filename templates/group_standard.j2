@@ -1,0 +1,23 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Builder for Security Groups to use in the access control for deployed image builders
+Resources:
+  InternalPrefixList: # Allow access from Amazon CORP Networks
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: >-
+        {{ partition }} partition security group
+      GroupName: image-builder-{{ partition }}-base-sg
+      VpcId: {{ aws_vpc_id }}
+      Tags:
+        - Key: "task"
+          Value: 
+        - Key: "maintained_by"
+          Value: {{ ansible_user_id }}
+      SecurityGroupIngress:
+        - CidrIp: {{ ipify_public_ip }}/32
+          Description: Address from the local machine
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
