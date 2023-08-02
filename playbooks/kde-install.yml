@@ -1,9 +1,9 @@
 ---
 - name: Outfit the base kde instances in the account
-  hosts:  tag_task_kde-cloud-instance
-  connection: local
+  hosts:  tag_task_kde_cloud_instance
 
   gather_facts: yes
+  remote_user: fedora
 
   collections:
     - community.general
@@ -20,13 +20,13 @@
 
   tasks:
     - name: Install KDE desktop
-      ansible.builtin.package:
+      ansible.builtin.dnf:
         name:
-          - kde-desktop-environment
-          - firefox 
-          - kde-apps
-          - kde-media
-          - libreoffice
+          - "@kde-desktop-environment"
+          - firefox
+          - "@kde-apps"
+          - "@kde-media"
+          - "@libreoffice"
           # add libreoffice-draw and libreoffice-math (pagureio:fedora-kde/SIG#103)
           - libreoffice-draw
           - libreoffice-math
@@ -36,18 +36,41 @@
           - kde-l10n
           - fuse
         state: present
+      become: true
 
-    - name: Install KDE desktop
-      ansible.builtin.package:
+    - name: Remove KDE desktop packages
+      ansible.builtin.dnf:
         name:
-          - admin-tools
-          # drop tracker stuff pulled in by gtk3 (pagureio:fedora-kde/SIG#124)
+          - "@admin-tools"
           - tracker-miners
           - tracker
-          ### The KDE-Desktop
           - ktorrent			# kget has also basic torrent features (~3 megs)
           - digikam			# digikam has duplicate functionality with gwenview (~28 megs)
           - kipi-plugins			# ~8 megs + drags in Marble
           - krusader			# ~4 megs
           - k3b				# ~15 megs
         state: absent
+      become: true
+
+    - name: "download Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
+      ansible.builtin.get_url:
+        url: "https://d1uj6qtbmh3dt5.cloudfront.net/2023.0/Servers/nice-dcv-2023.0-15487-el9-x86_64.tgz"
+        dest: /tmp/nice-dcv-2023.0-15487-el9-x86_64.tgz
+        checksum: sha256:https://d1uj6qtbmh3dt5.cloudfront.net/2023.0/Servers/nice-dcv-2023.0-15487-el9-x86_64.tgz.sha256sum
+
+    - name: "Import Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://d1uj6qtbmh3dt5.cloudfront.net/NICE-GPG-KEY
+      become: true
+
+    - name: "Unarchive the Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
+      ansible.builtin.unarchive:
+        remote_src: yes
+        src: /tmp/nice-dcv-2023.0-15487-el9-x86_64.tgz
+        dest: /tmp
+        list_files: true
+      register: nice_dcv_files
+
+    - name: "Install the Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
+      
