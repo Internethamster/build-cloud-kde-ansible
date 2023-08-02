@@ -3,6 +3,7 @@
   hosts:  tag_task_kde_cloud_instance
 
   gather_facts: yes
+#TODO: match deployment user from original deployment script
   remote_user: fedora
 
   collections:
@@ -73,4 +74,7 @@
       register: nice_dcv_files
 
     - name: "Install the Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
-      
+      ansible.builtin.dnf:
+        name: /tmp/nice-dcv-2023.0-15487-el9-x86_64/nice-dcv-server-2023.0.15487-1.el9.x86_64.rpm
+        state: present
+      become: true
