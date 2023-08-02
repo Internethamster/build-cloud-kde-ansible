@@ -30,13 +30,13 @@
     - name: Use this address in the security group configuration
       ansible.builtin.template:
         src: "groups_{{ partition }}.j2"
-        dest: "files/groups_{{ partition }}.yml"
+        dest: "../files/groups_{{ partition }}.yml"
     - name: "Define the groups_{{ partition}}.yml CFN"
       amazon.aws.cloudformation:
         stack_name: "kde-cloud-instance-sg"
         region: "{{ region }}"
         profile: "{{ profile }}"
-        template: "files/groups_{{ partition }}.yml"
+        template: "../files/groups_{{ partition }}.yml"
         create_changeset: true
         tags:
           maintained_by: "{{ ansible_user_id }}"
@@ -54,7 +54,7 @@
 
     - name: Get the most recently published image
       set_fact:
-      fedora_ami: "{{ fedora_amis.images | sort(attribute='creation_date') | last  }}"
+        fedora_ami: "{{ fedora_amis.images | sort(attribute='creation_date') | last  }}"
 
     - name: Deploy an instance for building images
       community.aws.ec2_instance:
