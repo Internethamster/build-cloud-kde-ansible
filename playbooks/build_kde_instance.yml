@@ -3,17 +3,13 @@
   hosts: localhost
   connection: local
 
-  gather_facts: yes
-
-  collections:
-    - community.general
-    - amazon.aws
+  gather_facts: true
 
   vars:
     partition: standard
     fedora_release: 38
     region: us-west-2
-    profile: default
+    profile: ansible
     aws_instance_role: kde-cloud-instance-tools-instance
     subnet: subnet-5fc5c727
     aws_vpc_id: vpc-5020cc39
@@ -24,14 +20,15 @@
 
 
   tasks:
-    - name: identify the current IP address from which this is being run
+    - name: Identify the current IP address from which this is being run
       community.general.ipify_facts:
         timeout: 20
     - name: Use this address in the security group configuration
       ansible.builtin.template:
         src: "groups_{{ partition }}.j2"
         dest: "../files/groups_{{ partition }}.yml"
-    - name: "Define the groups_{{ partition}}.yml CFN"
+        mode: u=rw,gr=r,o=r
+    - name: "Define the security groups_{{ partition}}.yml CFN"
       amazon.aws.cloudformation:
         stack_name: "kde-cloud-instance-sg"
         region: "{{ region }}"
@@ -42,7 +39,7 @@
           maintained_by: "{{ ansible_user_id }}"
           Stack: kde-cloud-instance
 
-    - name: Find the Fedora Cloud Base {{ fedora_release }} Image in the Fedora account
+    - name: "Find the  Image in the Fedora account Fedora Cloud Base {{ fedora_release }}"
       amazon.aws.ec2_ami_info:
         region: "{{ region }}"
         profile: "{{ profile }}"
@@ -53,12 +50,12 @@
       register: fedora_amis
 
     - name: Get the most recently published image
-      set_fact:
+      ansible.builtin.set_fact:
         fedora_ami: "{{ fedora_amis.images | sort(attribute='creation_date') | last  }}"
 
     - name: Deploy an instance for building images
       community.aws.ec2_instance:
-        name: "Builder-{{ ec2_architecture }}"
+        name: "KDE_Instance-{{ ec2_architecture }}"
         region: "{{ region }}"
         profile: "{{ profile }}"
         instance_role: "{{ aws_instance_role }}"
