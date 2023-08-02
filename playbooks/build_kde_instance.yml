@@ -15,8 +15,8 @@
     region: us-west-2
     profile: default
     aws_instance_role: kde-cloud-instance-tools-instance
-    subnet: subnet-fba35eb1
-    aws_vpc_id: vpc-94b6f1ec
+    subnet: subnet-5fc5c727
+    aws_vpc_id: vpc-5020cc39
     ec2_architecture: x86_64
     ec2_instance_type:
       x86_64: m6a.2xlarge
