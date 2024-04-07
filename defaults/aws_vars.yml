@@ -1,0 +1,8 @@
+---
+build_region: us-east-2
+vpc_id:
+  us-east-1: XXXX
+  us-east-2: XXXX
+  us-west-2: XXXX
+tags:
+  role: kiwi-builder
