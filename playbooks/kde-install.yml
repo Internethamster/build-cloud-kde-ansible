@@ -11,7 +11,7 @@
 
   vars:
     partition: standard
-    fedora_release: 38
+    fedora_release: 39
     region: us-west-2
     profile: default
     aws_instance_role: kde-cloud-instance-tools-instance
@@ -51,26 +51,3 @@
           - k3b				# ~15 megs
         state: absent
       become: true
-
-    - name: "download Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
-      ansible.builtin.get_url:
-        url: "https://d1uj6qtbmh3dt5.cloudfront.net/2023.0/Servers/nice-dcv-2023.0-15487-el9-x86_64.tgz"
-        dest: /tmp/nice-dcv-2023.0-15487-el9-x86_64.tgz
-        checksum: sha256:https://d1uj6qtbmh3dt5.cloudfront.net/2023.0/Servers/nice-dcv-2023.0-15487-el9-x86_64.tgz.sha256sum
-
-    - name: "Import Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
-      ansible.builtin.rpm_key:
-        state: present
-        key: https://d1uj6qtbmh3dt5.cloudfront.net/NICE-GPG-KEY
-      become: true
-
-    - name: "Unarchive the Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
-      ansible.builtin.unarchive:
-        remote_src: yes
-        src: /tmp/nice-dcv-2023.0-15487-el9-x86_64.tgz
-        dest: /tmp
-        list_files: true
-      register: nice_dcv_files
-
-    - name: "Install the Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
-      

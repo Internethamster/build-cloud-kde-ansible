@@ -1,0 +1,52 @@
+---
+- name: Build the Nice-DCV Server into the instances
+  hosts:  tag_task_kde_cloud_instance
+
+  gather_facts: yes
+  remote_user: fedora
+
+  collections:
+    - community.general
+    - amazon.aws
+
+  vars:
+    partition: standard
+    fedora_release: 39
+    region: us-west-2
+    profile: default
+    aws_instance_role: kde-cloud-instance-tools-instance
+    subnet: subnet-fba35eb1
+    aws_vpc_id: vpc-94b6f1ec
+
+  tasks:
+    - name: "download Nice-DCV Server 2023.0-15487 on Fedora {{ fedora_release }}"
+      ansible.builtin.get_url:
+        url: "https://d1uj6qtbmh3dt5.cloudfront.net/2023.1/Servers/nice-dcv-2023.1-16388-el9-x86_64.tgz"
+        dest: /tmp/nice-dcv-2023.1-16388-el9-x86_64.tgz
+        checksum: sha256:https://d1uj6qtbmh3dt5.cloudfront.net/2023.0/Servers/nice-dcv-2023.0-15487-el9-x86_64.tgz.sha256sum
+
+    # import NICE-GPG-KEY which is what the server is signed with.
+    - name: "Import Nice-DCV Server 2023.1-16388 on Fedora {{ fedora_release }}"
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://d1uj6qtbmh3dt5.cloudfront.net/NICE-GPG-KEY
+      become: true
+
+    - name: "Unarchive the Nice-DCV Server 2023.1-16388 on Fedora {{ fedora_release }}"
+      ansible.builtin.unarchive:
+        remote_src: yes
+        src: /tmp/nice-dcv-2023.1-16388-el9-x86_64.tgz
+        dest: /tmp
+        list_files: true
+      register: nice_dcv_files
+
+    - name: "select the rpm for Server"
+      set_fact:
+        server_package: "/tmp/{{ item }}"
+      when: item.find('nice-dcv-server') !=-1
+      with_items: "{{ nice_dcv_files.files }}"
+
+    - name: "Install the Nice-DCV Server 2023.1-16388 on Fedora {{ fedora_release }}"
+      ansible.builtin.dnf:
+        name: {{ server_package }}
+      become: true
