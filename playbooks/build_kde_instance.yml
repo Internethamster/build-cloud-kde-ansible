@@ -11,7 +11,7 @@
 
   vars:
     partition: standard
-    fedora_release: 38
+    fedora_release: 39
     region: us-west-2
     profile: default
     aws_instance_role: kde-cloud-instance-tools-instance
