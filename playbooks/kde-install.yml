@@ -35,6 +35,7 @@
           # minimal localization support - allows installing the kde-l10n-* packages
           - kde-l10n
           - fuse
+          - krdp-server
         state: present
       become: true
 
