@@ -19,6 +19,14 @@
     aws_vpc_id: vpc-94b6f1ec
 
   tasks:
+    - name: Switch to Fedora KDE release package
+      ansible.builtin.command: "dnf --assumeyes swap fedora-release-cloud fedora-release-kde"
+      when: "'fedora-release-cloud' in ansible_facts['packages']"
+      become: true
+    - name: Switch to Fedora KDE identity package
+      ansible.builtin.command: "dnf --assumeyes swap fedora-release-identity-cloud fedora-release-identity-kde"
+      when: "'fedora-release-identity-cloud' in ansible_facts['packages']"
+      become: true
     - name: Install KDE desktop
       ansible.builtin.dnf:
         name:
@@ -30,7 +38,6 @@
           # add libreoffice-draw and libreoffice-math (pagureio:fedora-kde/SIG#103)
           - libreoffice-draw
           - libreoffice-math
-          - fedora-release-kde
           ### fixes
           # minimal localization support - allows installing the kde-l10n-* packages
           - kde-l10n
