@@ -1,4 +1,4 @@
-
+--- 
 - name: identify the current IP address from which this is being run
   community.general.ipify_facts:
     timeout: 20
@@ -23,8 +23,6 @@
       maintained_by: "{{ ansible_user_id }}"
       Stack: kde-cloud-instance
       task:  kde-cloud-instance
-
-- name: 
 
 - name: "Find the Fedora Cloud Base {{ fedora_release }} Image in the Fedora account"
   amazon.aws.ec2_ami_info:
