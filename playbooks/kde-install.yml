@@ -43,9 +43,15 @@
           - kde-l10n
           - fuse
           - krdp-server
+          - waypipe
+          - weston
         state: present
       become: true
-
+    - name: Install Weston KDE Plasma startup program
+      ansible.builtin.copy:
+        src: "weston-start-kde-plasma"
+        dest: "/usr/local/weston-start-kde-plasma"
+        mode: "755"
     - name: Remove KDE desktop packages
       ansible.builtin.dnf:
         name:
