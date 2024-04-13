@@ -2,10 +2,10 @@
 - name: identify the current IP address from which this is being run
   community.general.ipify_facts:
     timeout: 20
-- name: Use this address in the security group configuration
-  ansible.builtin.template:
-    src: "groups_{{ partition }}.j2"
-    dest: "./files/groups_{{ partition }}.yml"
+# - name: Use this address in the security group configuration
+#   ansible.builtin.template:
+#     src: "groups_{{ partition }}.j2"
+#     dest: "./files/groups_{{ partition }}.yml"
     
 - name: "Define the groups_{{ partition }}.yml CFN"
   amazon.aws.cloudformation:
