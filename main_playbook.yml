@@ -1,0 +1,27 @@
+---
+- name: Main playbook for deployment
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  collections:
+    - community.general
+    - community.aws
+    - amazon.aws
+
+  vars:
+    partition: standard
+    fedora_release: 40
+    region: us-west-2
+    profile: image-builder
+    aws_instance_role: kde-cloud-instance-tools-instance
+    subnet: subnet-fba35eb1
+    aws_vpc_id: vpc-94b6f1ec
+    ec2_architecture: x86_64
+    ec2_instance_type:
+      x86_64: m6a.2xlarge
+      arm64: m6g.8xlarge
+
+  tasks:
+    - name: build instance
+      import_tasks: "./playbooks/build_kde_instance.yml"

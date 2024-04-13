@@ -1,0 +1,40 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Builder for Security Groups to use in the access control for deployed image builders
+Parameters:
+  myVPC:
+    Type: String
+  ansibleUser:
+    Type: String
+  ipifyPublicIp:
+    Type: String
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host
+      VpcId: !Ref myVPC
+      Tags:
+        - Key: "task"
+          Value: "kde-cloud-base"
+        - Key: "maintained_by"
+          Value: !Ref ansibleUser
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5902
+          ToPort: 5902
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          CidrIp: !Ref ipifyPublicIp
+          Description: Address from the local machine
+          FromPort: 22
+          ToPort: 22
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 5902
+          ToPort: 5902
+          CidrIp: 0.0.0.0/0
+Outputs:
+  KDEcloudSG:
+    Value: !GetAtt InstanceSecurityGroup.GroupId
