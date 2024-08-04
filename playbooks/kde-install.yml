@@ -43,10 +43,21 @@
           - kde-l10n
           - fuse
           - krdp-server
+          - seatd
           - waypipe
           - weston
         state: present
       become: true
+    - name: Configure unprivileged access to SeatD for {{ ansible_ssh_user }}
+      ansible.builtin.user:
+        name: "{{ ansible_ssh_user }}"
+        groups: seat
+        append: yes
+   - name: Enable SeatD service
+     ansible.builtin.systemd:
+        name: "seatd.service"
+        state: started
+        enabled: true
     - name: Install Weston KDE Plasma startup program
       ansible.builtin.copy:
         src: "weston-start-kde-plasma"
